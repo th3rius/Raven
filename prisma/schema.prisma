@@ -1,0 +1,979 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Area {
+  id             Int           @id @default(autoincrement())
+  gid            String        @unique @db.Uuid
+  name           String        @db.VarChar
+  typeId         Int?          @map("type")
+  editsPending   Int           @default(0) @map("edits_pending") @ignore
+  lastUpdated    DateTime?     @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  beginDateYear  Int?          @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth Int?          @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay   Int?          @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear    Int?          @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth   Int?          @map("end_date_month") @db.SmallInt @ignore
+  endDateDay     Int?          @map("end_date_day") @db.SmallInt @ignore
+  ended          Boolean       @default(false) @ignore
+  comment        String        @default("") @db.VarChar(255)
+  type           AreaType?     @relation(fields: [typeId], references: [id])
+  countryAreas   CountryArea[]
+  artists        Artist[]
+  artistsBegin   Artist[]      @relation("beginArea") @ignore
+  artistEnd      Artist[]      @relation("endArea") @ignore
+  aliases        AreaAlias[]
+  places         Place[]
+  labels         Label[]
+  iso31661       Iso31661?
+  iso31662       Iso31662?
+  iso31663       Iso31663?
+
+  @@index([name], name: "area_idx_name")
+  @@map("area")
+}
+
+model AreaAlias {
+  id               Int            @id @default(autoincrement())
+  areaId           Int            @map("area")
+  name             String         @db.VarChar
+  locale           String?
+  editsPending     Int            @default(0) @map("edits_pending") @ignore
+  lastUpdated      DateTime?      @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  typeId           Int?           @map("type")
+  sortName         String         @map("sort_name") @db.VarChar
+  beginDateYear    Int?           @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth   Int?           @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay     Int?           @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear      Int?           @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth     Int?           @map("end_date_month") @db.SmallInt @ignore
+  endDateDay       Int?           @map("end_date_day") @db.SmallInt
+  primaryForLocale Boolean        @default(false) @map("primary_for_locale") @ignore
+  ended            Boolean        @default(false) @ignore
+  area             Area           @relation(fields: [areaId], references: [id])
+  type             AreaAliasType? @relation(fields: [typeId], references: [id])
+
+  @@index([areaId], name: "area_alias_idx_area")
+  @@map("area_alias")
+}
+
+model AreaAliasType {
+  id          Int             @id @default(autoincrement())
+  name        String
+  parentId    Int?            @map("parent")
+  childOrder  Int             @default(0) @map("child_order")
+  description String?
+  gid         String          @unique @db.Uuid
+  parent      AreaAliasType?  @relation(fields: [parentId], references: [id])
+  children    AreaAliasType[] @relation("AreaAliasTypeToAreaAliasType")
+  areaAliases AreaAlias[]
+
+  @@map("area_alias_type")
+}
+
+model AreaType {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  parentId    Int?       @map("parent")
+  childOrder  Int        @default(0) @map("child_order")
+  description String?
+  gid         String     @unique @db.Uuid
+  areas       Area[]
+  parent      AreaType?  @relation(fields: [parentId], references: [id])
+  children    AreaType[] @relation("AreaTypeToAreaType")
+
+  @@map("area_type")
+}
+
+model Artist {
+  id                Int                @id @default(autoincrement())
+  gid               String             @unique @db.Uuid
+  name              String             @db.VarChar
+  sortName          String             @map("sort_name") @db.VarChar
+  beginDateYear     Int?               @map("begin_date_year") @db.SmallInt
+  beginDateMonth    Int?               @map("begin_date_month") @db.SmallInt
+  beginDateDay      Int?               @map("begin_date_day") @db.SmallInt
+  endDateYear       Int?               @map("end_date_year") @db.SmallInt
+  endDateMonth      Int?               @map("end_date_month") @db.SmallInt
+  endDateDay        Int?               @map("end_date_day") @db.SmallInt
+  typeId            Int?               @map("type")
+  areaId            Int?               @map("area")
+  genderId          Int?               @map("gender")
+  comment           String             @default("") @db.VarChar(255)
+  editsPending      Int                @default(0) @map("edits_pending") @ignore
+  lastUpdated       DateTime?          @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  ended             Boolean            @default(false) @ignore
+  beginAreaId       Int?               @map("begin_area") @ignore
+  endAreaId         Int?               @map("end_area") @ignore
+  type              ArtistType?        @relation(fields: [typeId], references: [id]) @ignore
+  area              Area?              @relation(fields: [areaId], references: [id])
+  gender            Gender?            @relation(fields: [genderId], references: [id]) @ignore
+  artistCreditNames ArtistCreditName[]
+  beginArea         Area?              @relation("beginArea", fields: [beginAreaId], references: [id]) @ignore
+  endArea           Area?              @relation("endArea", fields: [beginAreaId], references: [id]) @ignore
+
+  @@index([areaId], name: "artist_idx_area")
+  @@index([beginAreaId], name: "artist_idx_begin_area")
+  @@index([endAreaId], name: "artist_idx_end_area")
+  @@index([name], name: "artist_idx_name")
+  @@index([sortName], name: "artist_idx_sort_name")
+  @@map("artist")
+}
+
+model ArtistAlias {
+  id               Int              @id @default(autoincrement())
+  artist           Int
+  name             String           @db.VarChar
+  locale           String?
+  editsPending     Int              @default(0) @map("edits_pending")
+  lastUpdated      DateTime?        @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  typeId           Int?             @map("type")
+  sortName         String           @map("sort_name") @db.VarChar
+  beginDateYear    Int?             @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth   Int?             @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay     Int?             @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear      Int?             @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth     Int?             @map("end_date_month") @db.SmallInt @ignore
+  endDateDay       Int?             @map("end_date_day") @db.SmallInt @ignore
+  primaryForLocale Boolean          @default(false) @map("primary_for_locale") @ignore
+  ended            Boolean          @default(false) @ignore
+  type             ArtistAliasType? @relation(fields: [typeId], references: [id]) @ignore
+
+  @@index([artist], name: "artist_alias_idx_artist")
+  @@map("artist_alias")
+}
+
+model ArtistAliasType {
+  id          Int           @id @default(autoincrement())
+  name        String
+  parent      Int?
+  childOrder  Int           @default(0) @map("child_order")
+  description String?
+  gid         String        @unique @db.Uuid
+  aliases     ArtistAlias[]
+
+  @@map("artist_alias_type")
+  @@ignore
+}
+
+model ArtistCredit {
+  id                Int                @id @default(autoincrement())
+  name              String             @db.VarChar
+  artistCount       Int                @map("artist_count") @db.SmallInt
+  refCount          Int?               @default(0) @map("ref_count") @ignore
+  created           DateTime?          @default(now()) @db.Timestamptz(6) @ignore
+  editsPending      Int                @default(0) @map("edits_pending") @ignore
+  artistCreditNames ArtistCreditName[]
+  release           Release?
+  tracks            Track?
+  releaseGroups     ReleaseGroup?
+  recording         Recording?
+
+  @@map("artist_credit")
+}
+
+model ArtistCreditName {
+  artistCreditId Int          @map("artist_credit")
+  position       Int          @db.SmallInt
+  artistId       Int          @map("artist")
+  name           String       @db.VarChar
+  joinPhrase     String       @default("") @map("join_phrase")
+  artistCredit   ArtistCredit @relation(fields: [artistCreditId], references: [id])
+  artist         Artist       @relation(fields: [artistId], references: [id])
+
+  @@id([artistCreditId, position])
+  @@index([artistId], name: "artist_credit_name_idx_artist")
+  @@map("artist_credit_name")
+}
+
+model ArtistIsni {
+  artist       Int
+  isni         String    @db.Char(16)
+  editsPending Int       @default(0) @map("edits_pending")
+  created      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@id([artist, isni])
+  @@map("artist_isni")
+}
+
+model ArtistIpi {
+  artist       Int
+  ipi          String    @db.Char(11)
+  editsPending Int       @default(0) @map("edits_pending")
+  created      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@id([artist, ipi])
+  @@map("artist_ipi")
+}
+
+model ArtistType {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  parent      Int?
+  childOrder  Int      @default(0) @map("child_order")
+  description String?
+  gid         String   @unique @db.Uuid
+  artists     Artist[]
+
+  @@map("artist_type")
+  @@ignore
+}
+
+model ArtType {
+  id           Int            @id @default(autoincrement())
+  name         String
+  parent       Int?
+  childOrder   Int            @default(0) @map("child_order")
+  description  String?
+  gid          String         @unique @db.Uuid
+  coverArtType CoverArtType[]
+
+  @@map("art_type")
+  @@ignore
+}
+
+model Cdtoc {
+  id            Int           @id @default(autoincrement())
+  discid        String        @unique @db.Char(28)
+  freedbId      String        @map("freedb_id") @db.Char(8)
+  trackCount    Int           @map("track_count")
+  leadoutOffset Int           @map("leadout_offset")
+  trackOffset   Int[]         @map("track_offset")
+  degraded      Boolean       @default(false)
+  created       DateTime?     @default(now()) @db.Timestamptz(6) @ignore
+  mediumCdtocs  MediumCdtoc[]
+
+  @@index([freedbId], name: "cdtoc_idx_freedb_id")
+  @@map("cdtoc")
+}
+
+model CountryArea {
+  areaId         Int             @id @map("area")
+  area           Area            @relation(fields: [areaId], references: [id])
+  releaseCountry ReleaseCountry?
+
+  @@map("country_area")
+}
+
+model CoverArt {
+  id                BigInt        @id
+  releaseId         Int           @map("release")
+  comment           String        @default("")
+  editId            Int           @map("edit") @ignore
+  ordering          Int
+  dateUploaded      DateTime      @default(now()) @map("date_uploaded") @db.Timestamptz(6) @ignore
+  editsPending      Int           @default(0) @map("edits_pending") @ignore
+  mimeType          String        @map("mime_type")
+  filesize          Int?
+  thumb250Filesize  Int?          @map("thumb_250_filesize")
+  thumb500Filesize  Int?          @map("thumb_500_filesize")
+  thumb1200Filesize Int?          @map("thumb_1200_filesize")
+  release           Release       @relation(fields: [releaseId], references: id)
+  coverArtType      CoverArtType?
+  edit              Edit          @relation(fields: [editId], references: [id]) @ignore
+
+  @@index([releaseId], name: "cover_art_idx_release")
+  @@map("cover_art")
+}
+
+model CoverArtType {
+  id       BigInt
+  typeId   Int      @map("type_id")
+  coverArt CoverArt @relation(fields: [id], references: [id])
+  artType  ArtType  @relation(fields: [typeId], references: [id]) @ignore
+
+  @@id([id, typeId])
+  @@map("cover_art_type")
+}
+
+model Edit {
+  id         Int        @id @default(autoincrement())
+  editor     Int
+  type       Int        @db.SmallInt
+  status     Int        @db.SmallInt
+  autoedit   Int        @default(0) @db.SmallInt
+  openTime   DateTime?  @default(now()) @map("open_time") @db.Timestamptz(6)
+  closeTime  DateTime?  @map("close_time") @db.Timestamptz(6)
+  expireTime DateTime   @map("expire_time") @db.Timestamptz(6)
+  language   Int?
+  quality    Int        @default(1) @db.SmallInt
+  coverArts  CoverArt[]
+
+  @@index([closeTime], name: "edit_idx_close_time")
+  @@index([editor, id], name: "edit_idx_editor_id_desc")
+  @@index([editor, openTime], name: "edit_idx_editor_open_time")
+  @@index([expireTime], name: "edit_idx_expire_time")
+  @@index([openTime], name: "edit_idx_open_time")
+  @@index([type, id], name: "edit_idx_type_id")
+  @@map("edit")
+  @@ignore
+}
+
+model Gender {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  parentId    Int?     @map("parent")
+  childOrder  Int      @default(0) @map("child_order")
+  description String?
+  gid         String   @unique @db.Uuid
+  parent      Gender?  @relation(fields: [parentId], references: [id])
+  children    Gender[] @relation("GenderToGender")
+  artists     Artist[]
+
+  @@map("gender")
+  @@ignore
+}
+
+model Iso31661 {
+  areaId Int    @map("area")
+  code   String @id @db.Char(2)
+  area   Area   @relation(fields: [areaId], references: [id])
+
+  @@index([areaId], name: "iso_3166_1_idx_area")
+  @@map("iso_3166_1")
+}
+
+model Iso31662 {
+  areaId Int    @map("area")
+  code   String @id @db.VarChar(10)
+  area   Area   @relation(fields: [areaId], references: [id])
+
+  @@index([areaId], name: "iso_3166_2_idx_area")
+  @@map("iso_3166_2")
+}
+
+model Iso31663 {
+  areaId Int    @map("area")
+  code   String @id @db.Char(4)
+  area   Area   @relation(fields: [areaId], references: [id])
+
+  @@index([areaId], name: "iso_3166_3_idx_area")
+  @@map("iso_3166_3")
+}
+
+model Isrc {
+  id           Int       @id @default(autoincrement())
+  recordingId  Int       @map("recording")
+  isrc         String    @db.Char(12)
+  source       Int?      @db.SmallInt
+  editsPending Int       @default(0) @map("edits_pending") @ignore
+  created      DateTime? @default(now()) @db.Timestamptz(6) @ignore
+  recording    Recording @relation(fields: [recordingId], references: [id])
+
+  @@unique([isrc, recordingId], name: "isrc_idx_isrc_recording")
+  @@index([isrc], name: "isrc_idx_isrc")
+  @@index([recordingId], name: "isrc_idx_recording")
+  @@map("isrc")
+}
+
+model Iswc {
+  id           Int      @id @default(autoincrement())
+  workId       Int      @map("work")
+  iswc         String?  @db.Char(15)
+  source       Int?     @db.SmallInt
+  editsPending Int      @default(0) @map("edits_pending") @ignore
+  created      DateTime @default(now()) @db.Timestamptz(6) @ignore
+  work         Work     @relation(fields: [workId], references: [id])
+
+  @@unique([iswc, workId], name: "iswc_idx_iswc")
+  @@index([workId], name: "iswc_idx_work")
+  @@map("iswc")
+}
+
+model Label {
+  id             Int            @id @default(autoincrement())
+  gid            String         @unique @db.Uuid
+  name           String         @db.VarChar
+  beginDateYear  Int?           @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth Int?           @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay   Int?           @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear    Int?           @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth   Int?           @map("end_date_month") @db.SmallInt @ignore
+  endDateDay     Int?           @map("end_date_day") @db.SmallInt @ignore
+  labelCode      Int?           @map("label_code")
+  typeId         Int?           @map("type")
+  areaId         Int?           @map("area")
+  comment        String         @default("") @db.VarChar(255)
+  editsPending   Int            @default(0) @map("edits_pending") @ignore
+  lastUpdated    DateTime?      @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  ended          Boolean        @default(false) @ignore
+  releaseLabels  ReleaseLabel[]
+  ipilabels      LabelIpi?
+  isniLabels     LabelIsni[]
+  aliasLabels    LabelAlias[]
+  type           LabelType?     @relation(fields: [typeId], references: [id])
+  area           Area?          @relation(fields: [areaId], references: [id])
+
+  @@index([areaId], name: "label_idx_area")
+  @@index([name], name: "label_idx_name")
+  @@map("label")
+}
+
+model LabelAlias {
+  id               Int             @id @default(autoincrement())
+  labelId          Int             @map("label")
+  name             String          @db.VarChar
+  locale           String?
+  editsPending     Int             @default(0) @map("edits_pending") @ignore
+  lastUpdated      DateTime?       @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  typeId           Int?            @map("type")
+  sortName         String          @map("sort_name") @db.VarChar
+  beginDateYear    Int?            @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth   Int?            @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay     Int?            @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear      Int?            @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth     Int?            @map("end_date_month") @db.SmallInt @ignore
+  endDateDay       Int?            @map("end_date_day") @db.SmallInt @ignore
+  primaryForLocale Boolean         @default(false) @map("primary_for_locale") @ignore
+  ended            Boolean         @default(false) @ignore
+  label            Label           @relation(fields: [labelId], references: [id])
+  type             LabelAliasType? @relation(fields: [typeId], references: [id])
+
+  @@index([labelId], name: "label_alias_idx_label")
+  @@map("label_alias")
+}
+
+model LabelAliasType {
+  id          Int              @id @default(autoincrement())
+  name        String
+  parentId    Int?             @map("parent")
+  childOrder  Int              @default(0) @map("child_order")
+  description String?
+  gid         String           @unique @db.Uuid
+  parent      LabelAliasType?  @relation(fields: [parentId], references: [id])
+  children    LabelAliasType[] @relation("LabelAliasTypeToLabelAliasType")
+  aliases     LabelAlias[]
+
+  @@map("label_alias_type")
+}
+
+model LabelIsni {
+  labelId      Int       @map("label")
+  isni         String    @db.Char(16)
+  editsPending Int       @default(0) @map("edits_pending") @ignore
+  created      DateTime? @default(now()) @db.Timestamptz(6) @ignore
+  label        Label     @relation(fields: [labelId], references: [id])
+
+  @@id([labelId, isni])
+  @@map("label_isni")
+}
+
+model LabelIpi {
+  labelId      Int       @map("label")
+  ipi          String    @db.Char(11)
+  editsPending Int       @default(0) @map("edits_pending") @ignore
+  created      DateTime? @default(now()) @db.Timestamptz(6) @ignore
+  label        Label     @relation(fields: [labelId], references: [id])
+
+  @@id([labelId, ipi])
+  @@map("label_ipi")
+}
+
+model LabelType {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  parentId    Int?        @map("parent")
+  childOrder  Int         @default(0) @map("child_order")
+  description String?
+  gid         String      @unique @db.Uuid
+  parent      LabelType?  @relation(fields: [parentId], references: [id])
+  children    LabelType[] @relation("LabelTypeToLabelType")
+  labels      Label[]
+
+  @@map("label_type")
+}
+
+model Language {
+  id        Int       @id @default(autoincrement())
+  isoCode2t String?   @unique @map("iso_code_2t") @db.Char(3)
+  isoCode2b String?   @unique @map("iso_code_2b") @db.Char(3)
+  isoCode1  String?   @unique @map("iso_code_1") @db.Char(2)
+  name      String    @db.VarChar(100)
+  frequency Int       @default(0) @ignore
+  isoCode3  String?   @unique @map("iso_code_3") @db.Char(3)
+  releases  Release[]
+
+  @@map("language")
+}
+
+model Medium {
+  id           Int           @id @default(autoincrement())
+  releaseId    Int           @map("release")
+  position     Int
+  formatId     Int?          @map("format")
+  name         String        @default("") @db.VarChar
+  editsPending Int           @default(0) @map("edits_pending") @ignore
+  lastUpdated  DateTime?     @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  trackCount   Int           @default(0) @map("track_count")
+  tracklist    Track[]
+  mediumCdtoc  MediumCdtoc[]
+  release      Release       @relation(fields: [releaseId], references: [id])
+  format       MediumFormat? @relation(fields: [formatId], references: [id])
+
+  @@index([releaseId, position], name: "medium_idx_release_position")
+  @@index([trackCount], name: "medium_idx_track_count")
+  @@map("medium")
+}
+
+model MediumCdtoc {
+  id           Int       @id @default(autoincrement())
+  mediumId     Int       @map("medium")
+  cdtocId      Int       @map("cdtoc")
+  editsPending Int       @default(0) @map("edits_pending") @ignore
+  lastUpdated  DateTime? @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  medium       Medium    @relation(fields: [mediumId], references: [id])
+  cdtoc        Cdtoc     @relation(fields: [cdtocId], references: [id])
+
+  @@unique([mediumId, cdtocId], name: "medium_cdtoc_idx_uniq")
+  @@index([cdtocId], name: "medium_cdtoc_idx_cdtoc")
+  @@index([mediumId], name: "medium_cdtoc_idx_medium")
+  @@map("medium_cdtoc")
+}
+
+model MediumFormat {
+  id          Int            @id @default(autoincrement())
+  name        String         @db.VarChar(100)
+  parentId    Int?           @map("parent")
+  childOrder  Int            @default(0) @map("child_order")
+  year        Int?           @db.SmallInt
+  hasDiscids  Boolean        @default(false) @map("has_discids")
+  description String?
+  gid         String         @unique @db.Uuid
+  parent      MediumFormat?  @relation(fields: [parentId], references: [id])
+  children    MediumFormat[] @relation("MediumFormatToMediumFormat")
+  media       Medium[]
+
+  @@map("medium_format")
+}
+
+model Place {
+  id             Int                   @id @default(autoincrement())
+  gid            String                @unique @db.Uuid
+  name           String                @db.VarChar
+  typeId         Int?                  @map("type")
+  address        String                @default("") @db.VarChar
+  areaId         Int?                  @map("area")
+  coordinates    Unsupported("point")?
+  comment        String                @default("") @db.VarChar(255)
+  editsPending   Int                   @default(0) @map("edits_pending") @ignore
+  lastUpdated    DateTime?             @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  beginDateYear  Int?                  @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth Int?                  @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay   Int?                  @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear    Int?                  @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth   Int?                  @map("end_date_month") @db.SmallInt @ignore
+  endDateDay     Int?                  @map("end_date_day") @db.SmallInt @ignore
+  ended          Boolean               @default(false) @ignore
+  type           PlaceType?            @relation(fields: [typeId], references: [id]) @ignore
+  area           Area?                 @relation(fields: [areaId], references: [id])
+
+  @@index([areaId], name: "place_idx_area")
+  @@index([name], name: "place_idx_name")
+  @@map("place")
+}
+
+model PlaceAlias {
+  id               Int             @id @default(autoincrement())
+  place            Int
+  name             String          @db.VarChar
+  locale           String?
+  editsPending     Int             @default(0) @map("edits_pending") @ignore
+  lastUpdated      DateTime?       @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  typeId           Int?            @map("type")
+  sortName         String          @map("sort_name") @db.VarChar
+  beginDateYear    Int?            @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth   Int?            @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay     Int?            @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear      Int?            @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth     Int?            @map("end_date_month") @db.SmallInt @ignore
+  endDateDay       Int?            @map("end_date_day") @db.SmallInt @ignore
+  primaryForLocale Boolean         @default(false) @map("primary_for_locale") @ignore
+  ended            Boolean         @default(false) @ignore
+  type             PlaceAliasType? @relation(fields: [typeId], references: [id])
+
+  @@index([place], name: "place_alias_idx_place")
+  @@map("place_alias")
+}
+
+model PlaceAliasType {
+  id          Int              @id @default(autoincrement())
+  name        String
+  parentId    Int?             @map("parent")
+  childOrder  Int              @default(0) @map("child_order")
+  description String?
+  gid         String           @unique @db.Uuid
+  parent      PlaceAliasType?  @relation(fields: [parentId], references: [id])
+  children    PlaceAliasType[] @relation("PlaceAliasTypeToPlaceAliasType")
+  aliases     PlaceAlias[]
+
+  @@map("place_alias_type")
+}
+
+model PlaceType {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  parentId    Int?        @map("parent")
+  childOrder  Int         @default(0) @map("child_order")
+  description String?
+  gid         String      @unique @db.Uuid
+  parent      PlaceType?  @relation(fields: [parentId], references: [id])
+  children    PlaceType[] @relation("PlaceTypeToPlaceType")
+  places      Place[]
+
+  @@map("place_type")
+  @@ignore
+}
+
+model Recording {
+  id             Int          @id @default(autoincrement())
+  gid            String       @unique @db.Uuid
+  name           String       @db.VarChar
+  artistCreditId Int          @map("artist_credit")
+  length         Int?
+  comment        String       @default("") @db.VarChar(255)
+  editsPending   Int          @default(0) @map("edits_pending") @ignore
+  lastUpdated    DateTime?    @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  video          Boolean      @default(false)
+  track          Track?
+  artistCredit   ArtistCredit @relation(fields: [artistCreditId], references: [id])
+  isrc           Isrc?
+
+  @@index([artistCreditId], name: "recording_idx_artist_credit")
+  @@index([name], name: "recording_idx_name")
+  @@map("recording")
+}
+
+model Release {
+  id                    Int                    @id @default(autoincrement())
+  gid                   String                 @unique @db.Uuid
+  name                  String                 @db.VarChar
+  artistCreditId        Int                    @map("artist_credit")
+  releaseGroupId        Int                    @map("release_group")
+  statusId              Int?                   @map("status")
+  packagingId           Int?                   @map("packaging")
+  languageId            Int?                   @map("language")
+  scriptId              Int?                   @map("script")
+  barcode               String?                @db.VarChar(255)
+  comment               String                 @default("") @db.VarChar(255)
+  editsPending          Int                    @default(0) @map("edits_pending") @ignore
+  quality               Int                    @default(-1) @db.SmallInt @ignore
+  lastUpdated           DateTime?              @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  artistCredit          ArtistCredit           @relation(fields: [artistCreditId], references: [id])
+  releaseGroup          ReleaseGroup           @relation(fields: [releaseGroupId], references: [id])
+  status                ReleaseStatus?         @relation(fields: [statusId], references: [id])
+  packaging             ReleasePackaging?      @relation(fields: [packagingId], references: [id])
+  language              Language?              @relation(fields: [languageId], references: [id])
+  script                Script?                @relation(fields: [scriptId], references: [id])
+  releaseCountry        ReleaseCountry?
+  coverArt              CoverArt?
+  releaseUnknownCountry ReleaseUnknownCountry?
+  labels                ReleaseLabel[]
+  releaseGroupCoverArt  ReleaseGroupCoverArt?
+  media                 Medium[]
+
+  @@index([artistCreditId], name: "release_idx_artist_credit")
+  @@index([name], name: "release_idx_name")
+  @@index([releaseGroupId], name: "release_idx_release_group")
+  @@map("release")
+}
+
+model ReleaseCountry {
+  releaseId   Int         @map("release")
+  countryId   Int         @map("country")
+  dateYear    Int?        @map("date_year") @db.SmallInt
+  dateMonth   Int?        @map("date_month") @db.SmallInt
+  dateDay     Int?        @map("date_day") @db.SmallInt
+  release     Release     @relation(fields: [releaseId], references: [id])
+  countryArea CountryArea @relation(fields: [countryId], references: [areaId])
+
+  @@id([releaseId, countryId])
+  @@index([countryId], name: "release_country_idx_country")
+  @@map("release_country")
+}
+
+model ReleaseGroup {
+  id                            Int                            @id @default(autoincrement())
+  gid                           String                         @unique @db.Uuid
+  name                          String                         @db.VarChar
+  artistCreditId                Int                            @map("artist_credit")
+  typeId                        Int?                           @map("type")
+  comment                       String                         @default("") @db.VarChar(255)
+  editsPending                  Int                            @default(0) @map("edits_pending") @ignore
+  lastUpdated                   DateTime?                      @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  release                       Release[]
+  releaseGroupSecondaryTypeJoin ReleaseGroupSecondaryTypeJoin?
+  releaseGroupCoverArt          ReleaseGroupCoverArt?
+  artistCredit                  ArtistCredit                   @relation(fields: [artistCreditId], references: [id])
+  type                          ReleaseGroupPrimaryType?       @relation(fields: [typeId], references: [id])
+
+  @@index([artistCreditId], name: "release_group_idx_artist_credit")
+  @@index([name], name: "release_group_idx_name")
+  @@map("release_group")
+}
+
+model ReleaseGroupCoverArt {
+  releaseGroupId Int          @id @map("release_group")
+  releaseId      Int          @map("release")
+  releaseGroup   ReleaseGroup @relation(fields: [releaseGroupId], references: [id])
+  release        Release      @relation(fields: [releaseId], references: [id])
+
+  @@map("release_group_cover_art")
+}
+
+model ReleaseGroupPrimaryType {
+  id            Int                       @id @default(autoincrement())
+  name          String                    @db.VarChar(255)
+  parentId      Int?                      @map("parent")
+  childOrder    Int                       @default(0) @map("child_order")
+  description   String?
+  gid           String                    @unique @db.Uuid
+  parent        ReleaseGroupPrimaryType?  @relation(fields: [parentId], references: [id])
+  children      ReleaseGroupPrimaryType[] @relation("ReleaseGroupPrimaryTypeToReleaseGroupPrimaryType")
+  releaseGroups ReleaseGroup[]
+
+  @@map("release_group_primary_type")
+}
+
+model ReleaseGroupSecondaryType {
+  id                            Int                             @id @default(autoincrement())
+  name                          String
+  parentId                      Int?                            @map("parent")
+  childOrder                    Int                             @default(0) @map("child_order")
+  description                   String?
+  gid                           String                          @unique @db.Uuid
+  releaseGroupSecondaryTypeJoin ReleaseGroupSecondaryTypeJoin[]
+  parent                        ReleaseGroupSecondaryType?      @relation(fields: [parentId], references: [id])
+  children                      ReleaseGroupSecondaryType[]     @relation("ReleaseGroupSecondaryTypeToReleaseGroupSecondaryType")
+
+  @@map("release_group_secondary_type")
+}
+
+model ReleaseGroupSecondaryTypeJoin {
+  releaseGroupId  Int                       @map("release_group")
+  secondaryTypeId Int                       @map("secondary_type")
+  created         DateTime                  @default(now()) @db.Timestamptz(6) @ignore
+  releaseGroup    ReleaseGroup              @relation(fields: [releaseGroupId], references: [id])
+  secondaryType   ReleaseGroupSecondaryType @relation(fields: [secondaryTypeId], references: [id])
+
+  @@id([releaseGroupId, secondaryTypeId])
+  @@map("release_group_secondary_type_join")
+}
+
+model ReleaseLabel {
+  id            Int       @id @default(autoincrement())
+  releaseId     Int       @map("release")
+  labelId       Int?      @map("label")
+  catalogNumber String?   @map("catalog_number") @db.VarChar(255)
+  lastUpdated   DateTime? @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  release       Release   @relation(fields: [releaseId], references: [id])
+  label         Label?    @relation(fields: [labelId], references: [id])
+
+  @@index([labelId], name: "release_label_idx_label")
+  @@index([releaseId], name: "release_label_idx_release")
+  @@map("release_label")
+}
+
+model ReleasePackaging {
+  id          Int                @id @default(autoincrement())
+  name        String             @db.VarChar(255)
+  parentId    Int?               @map("parent")
+  childOrder  Int                @default(0) @map("child_order")
+  description String?
+  gid         String             @unique @db.Uuid
+  releases    Release[]
+  parent      ReleasePackaging?  @relation(fields: [parentId], references: [id])
+  children    ReleasePackaging[] @relation("ReleasePackagingToReleasePackaging")
+
+  @@map("release_packaging")
+}
+
+model ReleaseStatus {
+  id          Int             @id @default(autoincrement())
+  name        String          @db.VarChar(255)
+  parentId    Int?            @map("parent")
+  childOrder  Int             @default(0) @map("child_order")
+  description String?
+  gid         String          @unique @db.Uuid
+  releases    Release[]
+  parent      ReleaseStatus?  @relation(fields: [parentId], references: [id])
+  children    ReleaseStatus[] @relation("ReleaseStatusToReleaseStatus")
+
+  @@map("release_status")
+}
+
+model ReleaseUnknownCountry {
+  releaseId Int     @id @map("release")
+  dateYear  Int?    @map("date_year") @db.SmallInt
+  dateMonth Int?    @map("date_month") @db.SmallInt
+  dateDay   Int?    @map("date_day") @db.SmallInt
+  release   Release @relation(fields: [releaseId], references: [id])
+
+  @@map("release_unknown_country")
+}
+
+model Script {
+  id        Int       @id @default(autoincrement())
+  isoCode   String    @unique @map("iso_code") @db.Char(4)
+  isoNumber String    @map("iso_number") @db.Char(3)
+  name      String    @db.VarChar(100)
+  frequency Int       @default(0) @ignore
+  releases  Release[]
+
+  @@map("script")
+}
+
+model Track {
+  id             Int          @id @default(autoincrement())
+  gid            String       @unique @db.Uuid
+  recordingId    Int          @map("recording")
+  mediumId       Int          @map("medium")
+  position       Int
+  number         String
+  name           String       @db.VarChar
+  artistCreditId Int          @map("artist_credit")
+  length         Int?
+  editsPending   Int          @default(0) @map("edits_pending") @ignore
+  lastUpdated    DateTime?    @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  isDataTrack    Boolean      @default(false) @map("is_data_track") @ignore
+  recording      Recording    @relation(fields: [recordingId], references: [id])
+  medium         Medium       @relation(fields: [mediumId], references: [id])
+  artistCredit   ArtistCredit @relation(fields: [artistCreditId], references: [id])
+
+  @@index([artistCreditId], name: "track_idx_artist_credit")
+  @@index([mediumId, position], name: "track_idx_medium_position")
+  @@index([name], name: "track_idx_name")
+  @@index([recordingId], name: "track_idx_recording")
+  @@map("track")
+}
+
+model Url {
+  id           Int       @id @default(autoincrement())
+  gid          String    @unique @db.Uuid
+  url          String    @unique
+  editsPending Int       @default(0) @map("edits_pending") @ignore
+  lastUpdated  DateTime? @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+
+  @@map("url")
+}
+
+model Work {
+  id           Int             @id @default(autoincrement())
+  gid          String          @unique @db.Uuid
+  name         String          @db.VarChar
+  typeId       Int?            @map("type")
+  comment      String          @default("") @db.VarChar(255)
+  editsPending Int             @default(0) @map("edits_pending") @ignore
+  lastUpdated  DateTime?       @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  attributes   WorkAttribute[]
+  aliases      WorkAlias[]
+  type         WorkType?       @relation(fields: [typeId], references: [id])
+  iswc         Iswc?
+
+  @@index([name], name: "work_idx_name")
+  @@map("work")
+}
+
+model WorkAlias {
+  id               Int       @id @default(autoincrement())
+  workId           Int       @map("work")
+  name             String    @db.VarChar
+  locale           String?
+  editsPending     Int       @default(0) @map("edits_pending")
+  lastUpdated      DateTime? @default(now()) @map("last_updated") @db.Timestamptz(6) @ignore
+  typeId           Int?      @map("type")
+  sortName         String    @map("sort_name") @db.VarChar
+  beginDateYear    Int?      @map("begin_date_year") @db.SmallInt @ignore
+  beginDateMonth   Int?      @map("begin_date_month") @db.SmallInt @ignore
+  beginDateDay     Int?      @map("begin_date_day") @db.SmallInt @ignore
+  endDateYear      Int?      @map("end_date_year") @db.SmallInt @ignore
+  endDateMonth     Int?      @map("end_date_month") @db.SmallInt @ignore
+  endDateDay       Int?      @map("end_date_day") @db.SmallInt @ignore
+  primaryForLocale Boolean   @default(false) @map("primary_for_locale") @ignore
+  ended            Boolean   @default(false) @ignore
+  work             Work      @relation(fields: [workId], references: [id])
+  type             WorkType? @relation(fields: [typeId], references: [id])
+
+  @@index([workId], name: "work_alias_idx_work")
+  @@map("work_alias")
+}
+
+model WorkAliasType {
+  id          Int             @id @default(autoincrement())
+  name        String
+  parentId    Int?            @map("parent")
+  childOrder  Int             @default(0) @map("child_order")
+  description String?
+  gid         String          @unique @db.Uuid
+  parent      WorkAliasType?  @relation(fields: [parentId], references: [id])
+  children    WorkAliasType[] @relation("WorkAliasTypeToWorkAliasType")
+
+  @@map("work_alias_type")
+}
+
+model WorkAttribute {
+  id                              Int                            @id @default(autoincrement())
+  workId                          Int                            @map("work")
+  workAttributeTypeId             Int                            @map("work_attribute_type")
+  workAttributeTypeAllowedValueId Int?                           @map("work_attribute_type_allowed_value")
+  workAttributeText               String?                        @map("work_attribute_text")
+  work                            Work                           @relation(fields: [workId], references: [id])
+  workAttributeType               WorkAttributeType              @relation(fields: [workAttributeTypeId], references: [id])
+  workAttributeTypeAllowdValue    WorkAttributeTypeAllowedValue? @relation(fields: [workAttributeTypeAllowedValueId], references: [id])
+
+  @@index([workId], name: "work_attribute_idx_work")
+  @@map("work_attribute")
+}
+
+model WorkAttributeType {
+  id            Int                             @id @default(autoincrement())
+  name          String                          @db.VarChar(255)
+  comment       String                          @default("") @db.VarChar(255)
+  freeText      Boolean                         @map("free_text")
+  parentId      Int?                            @map("parent")
+  childOrder    Int                             @default(0) @map("child_order")
+  description   String?
+  gid           String                          @unique @db.Uuid
+  parent        WorkAttributeType?              @relation(fields: [parentId], references: [id])
+  childern      WorkAttributeType[]             @relation("WorkAttributeTypeToWorkAttributeType")
+  attributes    WorkAttribute[]
+  allowedValues WorkAttributeTypeAllowedValue[]
+
+  @@map("work_attribute_type")
+}
+
+model WorkAttributeTypeAllowedValue {
+  id                  Int                             @id @default(autoincrement())
+  workAttributeTypeId Int                             @map("work_attribute_type")
+  value               String?
+  parentId            Int?                            @map("parent")
+  childOrder          Int                             @default(0) @map("child_order")
+  description         String?
+  gid                 String                          @unique @db.Uuid
+  workAttributeType   WorkAttributeType               @relation(fields: [workAttributeTypeId], references: [id])
+  parent              WorkAttributeTypeAllowedValue?  @relation(fields: [parentId], references: [id])
+  children            WorkAttributeTypeAllowedValue[] @relation("WorkAttributeTypeAllowedValueToWorkAttributeTypeAllowedValue")
+  attributes          WorkAttribute[]
+
+  @@index([workAttributeTypeId], name: "work_attribute_type_allowed_value_idx_name")
+  @@map("work_attribute_type_allowed_value")
+}
+
+model WorkType {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  parentId    Int?        @map("parent")
+  childOrder  Int         @default(0) @map("child_order")
+  description String?
+  gid         String      @unique @db.Uuid
+  parent      WorkType?   @relation(fields: [parentId], references: [id])
+  children    WorkType[]  @relation("WorkTypeToWorkType")
+  aliases     WorkAlias[]
+  work        Work[]
+
+  @@map("work_type")
+}

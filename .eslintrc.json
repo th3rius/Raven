@@ -1,0 +1,17 @@
+{
+  "extends": "./node_modules/gts/",
+  "ignorePatterns": ["dist/", "node_modules/"],
+  "plugins": ["eslint-plugin-import"],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ],
+    "node/no-extraneous-import": "off",
+    "node/no-unpublished-import": "off"
+  }
+}
