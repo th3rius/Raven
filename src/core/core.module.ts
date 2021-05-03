@@ -14,6 +14,12 @@ import {ComplexityPlugin} from './plugins/complexity.plugin';
 import {PrismaService} from './prisma.service';
 import {OgmaInterceptorProvider} from './providers/ogma-interceptor.provider';
 import {RedisCacheProvider} from './providers/redis-cache.provider';
+import {Date} from './scalars/date.scalar';
+import {Duration} from './scalars/duration.scalar';
+import {ID} from './scalars/id.scalar';
+import {Interval} from './scalars/interval.scalar';
+import {Time} from './scalars/time.scalar';
+import {URI} from './scalars/uri.scalar';
 
 @Global()
 @Module({
@@ -61,7 +67,9 @@ import {RedisCacheProvider} from './providers/redis-cache.provider';
           // Required by ogma interceptor
           context: ({req, res}) => ({req, res}),
           executorFactory,
-          numberScalarMode: 'integer',
+          buildSchemaOptions: {
+            numberScalarMode: 'integer',
+          },
         };
       },
       inject: [RedisCache, ConfigService],
@@ -84,7 +92,12 @@ import {RedisCacheProvider} from './providers/redis-cache.provider';
   providers: [
     PrismaService,
     ComplexityPlugin,
-    // DurationScalar,
+    Duration,
+    Interval,
+    Date,
+    Time,
+    ID,
+    URI,
     OgmaInterceptorProvider,
     RedisCacheProvider,
   ],

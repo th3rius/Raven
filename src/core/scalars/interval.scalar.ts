@@ -3,21 +3,21 @@ import {Kind, ValueNode} from 'graphql';
 import luxon from 'luxon';
 
 /**
- * An ISO-8601 encoded duration string.
+ * An ISO-8601 encoded interval string.
  */
-@Scalar(Duration.name)
-export class Duration implements CustomScalar<string, luxon.Duration> {
+@Scalar(Interval.name)
+export class Interval implements CustomScalar<string, luxon.Interval> {
   parseValue(value: string) {
-    return luxon.Duration.fromISO(value);
+    return luxon.Interval.fromISO(value);
   }
 
-  serialize(value: luxon.Duration) {
+  serialize(value: luxon.Interval) {
     return value.toISO();
   }
 
   parseLiteral(ast: ValueNode) {
     if (ast.kind === Kind.STRING) {
-      return luxon.Duration.fromISO(ast.value);
+      return luxon.Interval.fromISO(ast.value);
     }
     return null;
   }
