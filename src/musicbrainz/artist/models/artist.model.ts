@@ -1,9 +1,13 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {Interval} from '../../../core/scalars/interval.scalar';
 import {URI} from '../../../core/scalars/uri.scalar';
 import {Area} from '../../area/models/area.model';
+import {RecordingConnection} from '../../recording/models/recording-connection.model';
+import {ReleaseGroupConnection} from '../../release-group/models/release-group-connection.model';
+import {ReleaseConnection} from '../../release/models/release-connection.model';
+import {WorkConnection} from '../../work/models/work-connection.model';
 import {ArtistType} from '../enums/artist-type.enum';
 import {Gender} from '../enums/gender.enum';
 
@@ -22,7 +26,8 @@ export class Artist implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The official name of an artist, be it a person or a band.
@@ -59,7 +64,7 @@ export class Artist implements Node {
    * The International Standard Name Identifier for the artist. See
    * [ISNI](https://musicbrainz.org/doc/ISNI) for more information.
    */
-  isni?: string;
+  isnis: string[];
 
   /**
    * An IPI (interested party information) code is an identifying number
@@ -67,7 +72,7 @@ export class Artist implements Node {
    * [IPI](https://musicbrainz.org/doc/IPI) for more information, including how
    * to find these codes.
    */
-  ipi?: string;
+  ipis?: string[];
 
   /**
    * The gender is used to explicitly state whether a person or character
@@ -86,4 +91,29 @@ export class Artist implements Node {
    * The URLs linked to this artist.
    */
   urls: URI[];
+
+  /**
+   * List of genres associated with an artist.
+   */
+  genres: string[];
+
+  /**
+   * List of recordings performed by an artist.
+   */
+  recordings: RecordingConnection;
+
+  /**
+   * List of releases performed by an artist.
+   */
+  releases: ReleaseConnection;
+
+  /**
+   * List of releases performed by an artist.
+   */
+  releaseGroups: ReleaseGroupConnection;
+
+  /**
+   * List of releases performed by an artist.
+   */
+  works: WorkConnection;
 }

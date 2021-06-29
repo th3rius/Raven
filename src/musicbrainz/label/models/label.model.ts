@@ -1,9 +1,10 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {Interval} from '../../../core/scalars/interval.scalar';
 import {URI} from '../../../core/scalars/uri.scalar';
 import {Area} from '../../area/models/area.model';
+import {ReleaseConnection} from '../../release/models/release-connection.model';
 import {LabelType} from '../enums/label-type.enum';
 
 /**
@@ -20,7 +21,8 @@ export class Label implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The official name of the label.
@@ -65,4 +67,6 @@ export class Label implements Node {
    * The URLs linked to this label.
    */
   urls: URI[];
+
+  releases: ReleaseConnection;
 }

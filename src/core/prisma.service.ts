@@ -5,7 +5,8 @@ import {Prisma, PrismaClient} from '@prisma/client';
 @Injectable()
 export class PrismaService
   extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel>
-  implements OnModuleInit, OnModuleDestroy {
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor(logger: OgmaService) {
     super({
       log: [
@@ -45,3 +46,5 @@ export class PrismaService
     await this.$disconnect();
   }
 }
+
+new PrismaClient().artist;

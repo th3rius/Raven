@@ -15,6 +15,6 @@ export class ArtistResolver {
   /**
    * Musicbrainz Artists.
    */
-  @Query(() => [ArtistConnection])
+  @Query(() => ArtistConnection)
   artists(@Args() args: ArtistsArgs) {}
 }

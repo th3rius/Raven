@@ -16,7 +16,7 @@ export class RecordingResolver {
   /**
    * Musicbrainz Releases.
    */
-  @Query(() => [RecordingConnection])
+  @Query(() => RecordingConnection)
   recordings(@Args() args: RecordingsArgs) {}
 
   /**
@@ -24,6 +24,6 @@ export class RecordingResolver {
    * [Chromaprint](https://acoustid.org/chromaprint), you can use this method
    * to lookup the MusicBrainz metadata associated with this fingerprint.
    */
-  @Query(() => [RecordingConnection])
+  @Query(() => RecordingConnection)
   lookupByFingerprint(@Args() args: LookupByFingerprintArgs) {}
 }

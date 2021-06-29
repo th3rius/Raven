@@ -15,6 +15,6 @@ export class ReleaseGroupResolver {
   /**
    * Musicbrainz Release Groups.
    */
-  @Query(() => [ReleaseGroupConnection])
+  @Query(() => ReleaseGroupConnection)
   releaseGroups(@Args() args: ReleaseGroupsArgs) {}
 }

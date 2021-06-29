@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {Duration} from '../../../core/scalars/duration.scalar';
 import {ID} from '../../../core/scalars/id.scalar';
@@ -29,7 +29,8 @@ export class Recording implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The title of the recording.
@@ -73,4 +74,9 @@ export class Recording implements Node {
    * The releases an recording appears in.
    */
   releases: Release[];
+
+  /**
+   * List of genres associated with a recording.
+   */
+  genres: string[];
 }

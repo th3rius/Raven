@@ -15,6 +15,6 @@ export class EventResolver {
   /**
    * Musicbrainz Events.
    */
-  @Query(() => [EventConnection])
+  @Query(() => EventConnection)
   events(@Args() args: EventsArgs) {}
 }

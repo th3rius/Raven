@@ -9,7 +9,7 @@ describe('AppResolver', () => {
       providers: [AppResolver],
     }).compile();
 
-    resolver = module.get<AppResolver>(AppResolver);
+    resolver = module.get < AppResolver > AppResolver;
   });
 
   it('should be defined', () => {

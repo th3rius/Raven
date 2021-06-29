@@ -8,6 +8,5 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "strictPropertyInitialization": false,
-    "incremental": true
   }
 }

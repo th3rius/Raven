@@ -15,6 +15,6 @@ export class LabelResolver {
   /**
    * Musicbrainz Labels.
    */
-  @Query(() => [LabelConnection])
+  @Query(() => LabelConnection)
   labels(@Args() args: LabelsArgs) {}
 }

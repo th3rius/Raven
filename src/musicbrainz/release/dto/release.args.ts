@@ -6,5 +6,5 @@ export class ReleaseArgs {
   /**
    * ID of the object.
    */
-  id: ID;
+  id: string;
 }

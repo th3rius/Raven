@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {Interval} from '../../../core/scalars/interval.scalar';
@@ -17,7 +17,8 @@ export class Event implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The name is the official name of the event if it has one, or a descriptive
@@ -47,4 +48,9 @@ export class Event implements Node {
    * examples.
    */
   setlist: string;
+
+  /**
+   * List of genres associated with an event.
+   */
+  genres: string[];
 }

@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {Interval} from '../../../core/scalars/interval.scalar';
@@ -16,7 +16,8 @@ export class Place implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The place name is the official name of a place.

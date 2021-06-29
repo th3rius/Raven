@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {InstrumentType} from '../enums/instrument-type.enum';
@@ -21,7 +21,8 @@ export class Instrument implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The instrument name is the name of the instrument, typically the most

@@ -15,6 +15,6 @@ export class WorkResolver {
   /**
    * Musicbrainz Works.
    */
-  @Query(() => [WorkConnection])
+  @Query(() => WorkConnection)
   works(@Args() args: WorksArgs) {}
 }

@@ -1,6 +1,5 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
-import {Date} from '../../../core/scalars/date.scalar';
 import {ID} from '../../../core/scalars/id.scalar';
 import {URI} from '../../../core/scalars/uri.scalar';
 import {Coverart} from '../../../coverartarchive/models/coverart.model';
@@ -30,7 +29,8 @@ export class Release implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The title of the release.
@@ -89,7 +89,7 @@ export class Release implements Node {
   /**
    * The date the release was issued.
    */
-  date?: Date;
+  date?: string;
 
   /**
    * Cover art, also known as "album art" or "album artwork", is artwork that

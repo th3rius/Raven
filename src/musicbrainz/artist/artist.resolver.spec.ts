@@ -9,7 +9,7 @@ describe('ArtistResolver', () => {
       providers: [ArtistResolver],
     }).compile();
 
-    resolver = module.get<ArtistResolver>(ArtistResolver);
+    resolver = module.get < ArtistResolver > ArtistResolver;
   });
 
   it('should be defined', () => {

@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {URI} from '../../../core/scalars/uri.scalar';
@@ -18,7 +18,8 @@ export class Work implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The canonical title of the work, expressed in the language it was
@@ -54,4 +55,9 @@ export class Work implements Node {
    * The URLs linked to this release.
    */
   urls: URI[];
+
+  /**
+   * List of genres associated with a work.
+   */
+  genres: string[];
 }

@@ -9,6 +9,6 @@ export abstract class Node {
   /**
    * ID of the object.
    */
-  @Field()
-  id: ID;
+  @Field(() => ID)
+  id: string;
 }

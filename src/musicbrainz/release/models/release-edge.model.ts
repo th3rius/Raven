@@ -14,5 +14,5 @@ export class ReleaseEdge {
   /**
    * The item at the end of the edge.
    */
-  edge: Release;
+  node: Release;
 }

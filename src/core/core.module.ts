@@ -1,4 +1,4 @@
-import {Global, Module} from '@nestjs/common';
+import {ClassSerializerInterceptor, Global, Module} from '@nestjs/common';
 import {ConfigModule, ConfigService} from '@nestjs/config';
 import {ElasticsearchModule} from '@nestjs/elasticsearch';
 import {GraphQLModule} from '@nestjs/graphql';
@@ -11,10 +11,10 @@ import responseCachePlugin from 'apollo-server-plugin-response-cache';
 import Joi from 'joi';
 import {executorFactory} from './factories/executor.factory';
 import {ComplexityPlugin} from './plugins/complexity.plugin';
-import {PrismaService} from './prisma.service';
+import {SentryPlugin} from './plugins/sentry.plugin';
 import {OgmaInterceptorProvider} from './providers/ogma-interceptor.provider';
 import {RedisCacheProvider} from './providers/redis-cache.provider';
-import {Date} from './scalars/date.scalar';
+import {ValidationPipeProvider} from './providers/validation-pipe.provider';
 import {Duration} from './scalars/duration.scalar';
 import {ID} from './scalars/id.scalar';
 import {Interval} from './scalars/interval.scalar';
@@ -90,17 +90,20 @@ import {URI} from './scalars/uri.scalar';
     }),
   ],
   providers: [
-    PrismaService,
+    // PrismaService,
     ComplexityPlugin,
+    SentryPlugin,
     Duration,
     Interval,
-    Date,
+    // Date,
     Time,
     ID,
     URI,
     OgmaInterceptorProvider,
     RedisCacheProvider,
+    ValidationPipeProvider,
+    ClassSerializerInterceptor,
   ],
-  exports: [ElasticsearchModule, PrismaService, RedisCache],
+  exports: [ElasticsearchModule, RedisCache],
 })
 export class CoreModule {}

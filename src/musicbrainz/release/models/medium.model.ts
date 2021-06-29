@@ -31,7 +31,7 @@ export class Medium {
   /**
    * The [format](https://musicbrainz.org/doc/Release/Format) of the medium.
    */
-  format: string;
+  format?: string;
 
   /**
    * Tracklists represent the set and ordering of

@@ -9,7 +9,7 @@ describe('LabelResolver', () => {
       providers: [LabelResolver],
     }).compile();
 
-    resolver = module.get<LabelResolver>(LabelResolver);
+    resolver = module.get < LabelResolver > LabelResolver;
   });
 
   it('should be defined', () => {

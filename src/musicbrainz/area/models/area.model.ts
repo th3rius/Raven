@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {URI} from '../../../core/scalars/uri.scalar';
@@ -15,7 +15,8 @@ export class Area implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The name of the area.
@@ -31,7 +32,7 @@ export class Area implements Node {
    * The [ISO 3166 codes](https://en.wikipedia.org/wiki/ISO_3166) are the codes
    * assigned by ISO to countries and subdivisions.
    */
-  iso31661: string[];
+  iso31661?: string;
 
   /**
    * The URLs linked to this area.

@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {ID} from '../../../core/scalars/id.scalar';
 import {URI} from '../../../core/scalars/uri.scalar';
@@ -35,7 +35,8 @@ export class ReleaseGroup implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The title of a release group is usually very similar, if not the same, as
@@ -87,4 +88,9 @@ export class ReleaseGroup implements Node {
    * pieces — right down to the sticker on the shrinkwrap.
    */
   coverart: Coverart[];
+
+  /**
+   * List of genres associated with a release group.
+   */
+  genres: string[];
 }

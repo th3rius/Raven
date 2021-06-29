@@ -9,7 +9,7 @@ describe('EventResolver', () => {
       providers: [EventResolver],
     }).compile();
 
-    resolver = module.get<EventResolver>(EventResolver);
+    resolver = module.get < EventResolver > EventResolver;
   });
 
   it('should be defined', () => {

@@ -9,7 +9,7 @@ describe('WorkResolver', () => {
       providers: [WorkResolver],
     }).compile();
 
-    resolver = module.get<WorkResolver>(WorkResolver);
+    resolver = module.get < WorkResolver > WorkResolver;
   });
 
   it('should be defined', () => {

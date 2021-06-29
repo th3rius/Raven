@@ -1,4 +1,4 @@
-import {ObjectType} from '@nestjs/graphql';
+import {Field, ObjectType} from '@nestjs/graphql';
 import {Node} from '../../../core/interfaces/node.interface';
 import {Duration} from '../../../core/scalars/duration.scalar';
 import {ID} from '../../../core/scalars/id.scalar';
@@ -19,12 +19,21 @@ export class Track implements Node {
    * MBIDs](https://musicbrainz.org/doc/MusicBrainz_Identifier) for more
    * information.
    */
-  id: ID;
+  @Field(() => ID)
+  id: string;
 
   /**
    * The length of the track.
    */
   length?: Duration;
+
+  /**
+   * Typically tracks are numbered from 1..n. However, track numbers can be
+   * altered to more closely reflect [Artist
+   * Intent](https://wiki.musicbrainz.org/Style/Principle/Error_correction_and_artist_intent#Artist_Intent),
+   * the specific release and details of sides, chapters and other groupings.
+   */
+  number?: string;
 
   /**
    * The recording associated with this track.
